@@ -1,59 +1,69 @@
-# Paso 1: Configuración inicial
-set.seed(123)  # Asegurar reproducibilidad
+# Función para leer el archivo de entrada
+leer_numeros <- function(archivo) {
+  # Verificar si el archivo existe
+  if (!file.exists(archivo)) {
+    stop("Error: El archivo no existe.")
+  }
+  
+  # Leer los números del archivo y convertirlos en un vector de enteros
+  numeros <- as.integer(readLines(archivo))
+  return(numeros)
+}
 
-# Crear los vectores
-energia <- c(rep("Renovable", 10), rep("No Renovable", 10))
-consumo <- c(50, 60, NA, 40, 55, 65, NA, 70, 45, NA, 
-             80, NA, 90, 85, 75, 100, 95, NA, 110, 105)
-costo_kwh <- c(rep(0.12, 10), rep(0.15, 10))
+# Función para calcular estadísticas
+calcular_estadisticas <- function(numeros) {
+  media <- mean(numeros, na.rm = TRUE)
+  mediana <- median(numeros, na.rm = TRUE)
+  desviacion_estandar <- sd(numeros, na.rm = TRUE)
+  
+  # Verificar alta variabilidad
+  if (desviacion_estandar > 10) {
+    cat("Alta variabilidad detectada: la desviación estándar es mayor que 10.\n")
+  }
+  
+  return(list(media = media, mediana = mediana, desviacion_estandar = desviacion_estandar))
+}
 
-# Paso 2: Limpieza de datos
-# Calcular la mediana de consumo para cada tipo de energía
-medianas_consumo <- tapply(consumo, energia, function(x) median(x, na.rm = TRUE))
+# Función para calcular el cuadrado de los números usando sapply()
+calcular_cuadrados <- function(numeros) {
+  cuadrados <- sapply(numeros, function(x) x^2)
+  return(cuadrados)
+}
 
-# Reemplazar valores NA con la mediana correspondiente
-consumo_limpio <- ifelse(is.na(consumo) & energia == "Renovable", medianas_consumo["Renovable"],
-                   ifelse(is.na(consumo) & energia == "No Renovable", medianas_consumo["No Renovable"], 
-                          consumo))
+# Función para escribir resultados en el archivo de salida
+escribir_resultados <- function(archivo_salida, estadisticas, cuadrados) {
+  # Crear el contenido del archivo
+  resultados <- c(
+    "Resultados del análisis de números:",
+    paste("Media:", round(estadisticas$media, 2)),
+    paste("Mediana:", estadisticas$mediana),
+    paste("Desviación estándar:", round(estadisticas$desviacion_estandar, 2)),
+    "\nCuadrados de los números:",
+    paste(cuadrados, collapse = ", ")
+  )
+  
+  # Escribir los resultados en el archivo
+  writeLines(resultados, archivo_salida)
+}
 
-# Paso 3: Creación del dataframe
-df_consumo <- data.frame(
-  energia = energia,
-  consumo = consumo_limpio,
-  costo_kwh = costo_kwh
-)
+# Script principal
+procesar_numeros <- function(archivo_entrada, archivo_salida) {
+  # Leer los números del archivo
+  numeros <- leer_numeros(archivo_entrada)
+  
+  # Calcular estadísticas
+  estadisticas <- calcular_estadisticas(numeros)
+  
+  # Calcular los cuadrados de los números
+  cuadrados <- calcular_cuadrados(numeros)
+  
+  # Escribir los resultados en el archivo de salida
+  escribir_resultados(archivo_salida, estadisticas, cuadrados)
+  
+  cat("El análisis se ha completado y los resultados se han guardado en", archivo_salida, "\n")
+}
 
-# Paso 4: Cálculos
-# Calcular el costo total diario
-df_consumo$costo_total <- df_consumo$consumo * df_consumo$costo_kwh
-
-# Calcular el total de consumo y costo por tipo de energía
-totales <- aggregate(cbind(consumo, costo_total) ~ energia, data = df_consumo, sum)
-
-# Calcular el consumo promedio diario por tipo de energía
-promedios <- aggregate(consumo ~ energia, data = df_consumo, mean)
-
-# Agregar columna de ganancia simulando un aumento de precio del 10%
-df_consumo$ganancia <- df_consumo$costo_total * 1.1
-
-# Paso 5: Resumen
-# Ordenar el dataframe por la columna costo_total en orden descendente
-df_ordenado <- df_consumo[order(-df_consumo$costo_total), ]
-
-# Calcular el total de consumo y costo por tipo de energía
-total_consumo <- tapply(df_consumo$consumo, df_consumo$energia, sum)
-total_costos <- tapply(df_consumo$costo_total, df_consumo$energia, sum)
-
-# Extraer las tres filas con mayor costo_total
-top_3_costos <- head(df_ordenado, 3)
-
-# Crear la lista resumen
-resumen_energia <- list(
-  dataframe_ordenado = df_ordenado,
-  total_consumo_por_tipo = total_consumo,
-  total_costos_por_tipo = total_costos,
-  top_3_costos = top_3_costos
-)
-
-# Mostrar el resumen final
-print(resumen_energia)
+# Ejecutar el script con el archivo de entrada y salida
+archivo_entrada <- "numeros.txt"
+archivo_salida <- "resultados.txt"
+procesar_numeros(archivo_entrada, archivo_salida)
