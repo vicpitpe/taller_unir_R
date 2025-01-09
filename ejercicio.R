@@ -1,69 +1,73 @@
-# Función para leer el archivo de entrada
-leer_numeros <- function(archivo) {
-  # Verificar si el archivo existe
-  if (!file.exists(archivo)) {
-    stop("Error: El archivo no existe.")
-  }
-  
-  # Leer los números del archivo y convertirlos en un vector de enteros
-  numeros <- as.integer(readLines(archivo))
-  return(numeros)
-}
+# Instalar y cargar librerías
+if (!require("dplyr")) install.packages("dplyr")
+if (!require("tidyr")) install.packages("tidyr")
 
-# Función para calcular estadísticas
-calcular_estadisticas <- function(numeros) {
-  media <- mean(numeros, na.rm = TRUE)
-  mediana <- median(numeros, na.rm = TRUE)
-  desviacion_estandar <- sd(numeros, na.rm = TRUE)
-  
-  # Verificar alta variabilidad
-  if (desviacion_estandar > 10) {
-    cat("Alta variabilidad detectada: la desviación estándar es mayor que 10.\n")
-  }
-  
-  return(list(media = media, mediana = mediana, desviacion_estandar = desviacion_estandar))
-}
+library(dplyr)
+library(tidyr)
 
-# Función para calcular el cuadrado de los números usando sapply()
-calcular_cuadrados <- function(numeros) {
-  cuadrados <- sapply(numeros, function(x) x^2)
-  return(cuadrados)
-}
+# Cargar el dataset mtcars
+data(mtcars)
+df <- as.data.frame(mtcars)
 
-# Función para escribir resultados en el archivo de salida
-escribir_resultados <- function(archivo_salida, estadisticas, cuadrados) {
-  # Crear el contenido del archivo
-  resultados <- c(
-    "Resultados del análisis de números:",
-    paste("Media:", round(estadisticas$media, 2)),
-    paste("Mediana:", estadisticas$mediana),
-    paste("Desviación estándar:", round(estadisticas$desviacion_estandar, 2)),
-    "\nCuadrados de los números:",
-    paste(cuadrados, collapse = ", ")
+# Seleccionar columnas mpg, cyl, hp, gear y filtrar filas donde cyl > 4
+df_filtered <- df %>%
+  select(mpg, cyl, hp, gear) %>%
+  filter(cyl > 4)
+
+print(df_filtered)
+
+# Ordenar por hp en forma descendente y renombrar mpg a consumo y hp a potencia
+df_ordered <- df_filtered %>%
+  arrange(desc(hp)) %>%
+  rename(consumo = mpg, potencia = hp)
+
+print(df_ordered)
+
+# Crear la columna eficiencia y agrupar por cyl para calcular métricas
+df_aggregated <- df_ordered %>%
+  mutate(eficiencia = consumo / potencia) %>%
+  group_by(cyl) %>%
+  summarise(
+    consumo_medio = mean(consumo, na.rm = TRUE),
+    potencia_maxima = max(potencia, na.rm = TRUE)
   )
-  
-  # Escribir los resultados en el archivo
-  writeLines(resultados, archivo_salida)
-}
 
-# Script principal
-procesar_numeros <- function(archivo_entrada, archivo_salida) {
-  # Leer los números del archivo
-  numeros <- leer_numeros(archivo_entrada)
-  
-  # Calcular estadísticas
-  estadisticas <- calcular_estadisticas(numeros)
-  
-  # Calcular los cuadrados de los números
-  cuadrados <- calcular_cuadrados(numeros)
-  
-  # Escribir los resultados en el archivo de salida
-  escribir_resultados(archivo_salida, estadisticas, cuadrados)
-  
-  cat("El análisis se ha completado y los resultados se han guardado en", archivo_salida, "\n")
-}
+print(df_aggregated)
 
-# Ejecutar el script con el archivo de entrada y salida
-archivo_entrada <- "numeros.txt"
-archivo_salida <- "resultados.txt"
-procesar_numeros(archivo_entrada, archivo_salida)
+# Crear un nuevo dataframe para tipo_transmision
+tipo_transmision <- data.frame(
+  gear = c(3, 4, 5),
+  tipo_transmision = c("Manual", "Automática", "Semiautomática")
+)
+
+# Realizar un left_join con el dataframe principal
+df_joined <- df_ordered %>%
+  left_join(tipo_transmision, by = "gear")
+
+print(df_joined)
+
+# Transformar a formato largo
+df_long <- df_joined %>%
+  pivot_longer(
+    cols = c(consumo, potencia, eficiencia),
+    names_to = "medida",
+    values_to = "valor"
+  )
+
+print(df_long)
+
+# Identificar y manejar duplicados
+df_long_clean <- df_long %>%
+  group_by(cyl, gear, tipo_transmision, medida) %>%
+  summarise(valor = mean(valor, na.rm = TRUE), .groups = "drop")
+
+print(df_long_clean)
+
+# Transformar de nuevo a formato ancho
+df_wide <- df_long_clean %>%
+  pivot_wider(
+    names_from = medida,
+    values_from = valor
+  )
+
+print(df_wide)
