@@ -71,8 +71,8 @@ Este gráfico muestra que, a medida que aumenta el peso del vehículo, el consum
 # Conclusiones
 
 A partir del análisis realizado, se destacan los siguientes hallazgos:
-	•	Existe una relación inversa entre el peso del vehículo y su consumo de combustible, lo que indica que los vehículos más pesados consumen más gasolina por milla recorrida.
-	•	Las tablas interactivas permiten explorar y filtrar los datos de manera dinámica, facilitando el análisis.
-	•	Los gráficos son herramientas poderosas para visualizar relaciones complejas entre variables.
+- Existe una relación inversa entre el peso del vehículo y su consumo de combustible, lo que indica que los vehículos más pesados consumen más gasolina por milla recorrida.
+- Las tablas interactivas permiten explorar y filtrar los datos de manera dinámica, facilitando el análisis.
+- Los gráficos son herramientas poderosas para visualizar relaciones complejas entre variables.
 
 Este análisis es un punto de partida para estudios más avanzados en los que se podrían incluir modelos predictivos o análisis de correlación más detallados.
