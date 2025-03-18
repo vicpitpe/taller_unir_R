@@ -1,48 +1,36 @@
-# Cargar las librerías necesarias
-library(tseries)
-library(ggplot2)
+Requisitos
+Usar el dataset nottem incluido en R.
+Analizar la serie temporal para detectar patrones de tendencia, estacionalidad y valores atípicos.
+Evaluar la estacionariedad de la serie temporal.
+Documentar todo el proceso en un archivo .R o .Rmd y subirlo a un repositorio público en GitHub.
+Instrucciones
+Este proyecto debe ser desarrollado localmente en tu ordenador utilizando RStudio. Una vez hayas completado el código, selecciona la opción “Cargar repositorio GitHub” para subir únicamente el archivo .R o .Rmd en el que desarrollaste el proyecto.
 
-# 1. Carga del dataset
-data("AirPassengers")
+1.   Carga del dataset:
 
-# Inspeccionar la estructura del dataset
-print(class(AirPassengers))   # Verifica que es una serie temporal (ts)
-print(summary(AirPassengers)) # Resumen estadístico
-print(start(AirPassengers))   # Inicio de la serie
-print(end(AirPassengers))     # Fin de la serie
-print(frequency(AirPassengers)) # Frecuencia: 12 (mensual)
+Usa el dataset nottem incluido en R.
+Inspecciona la estructura del dataset y grafica la serie temporal:
+# Cargar el dataset
+data("nottem")
 
-# 2. Exploración inicial
+# Inspeccionar la estructura
+print(class(nottem))
+print(summary(nottem))
+
 # Graficar la serie temporal
-plot(AirPassengers, main="Serie Temporal de AirPassengers", ylab="Número de Pasajeros", xlab="Año")
+plot(nottem, main = "Temperaturas Mensuales en Nottingham (1920-1939)",
+     xlab = "Año", ylab = "Temperatura", col = "blue")
+2.   Exploración y preparación de datos:
 
-# Calcular estadísticas descriptivas básicas
-mean(AirPassengers)
-sd(AirPassengers)
+Descompón la serie temporal para identificar componentes de tendencia, estacionalidad y aleatoriedad.
+3.   Análisis de estacionariedad:
 
-# 3. Análisis de tendencia y estacionalidad
-# Descomponer la serie temporal
-decomposed <- decompose(AirPassengers)
-plot(decomposed)
+Usa gráficos ACF/PACF para identificar patrones de autocorrelación.
+Realiza la prueba de Dickey-Fuller para evaluar la estacionariedad de la serie.
+4.   Transformación de la serie (si es necesario):
 
-# 4. Análisis de estacionariedad
-# Gráficos de autocorrelación
-acf(AirPassengers, main="ACF de AirPassengers")
-pacf(AirPassengers, main="PACF de AirPassengers")
+Si la serie no es estacionaria, aplica una diferenciación para convertirla.
+Verifica nuevamente la estacionariedad.
+5.   Detección de valores atípicos:
 
-# Prueba de Dickey-Fuller aumentada
-adf.test(AirPassengers)
-
-# Si la serie no es estacionaria, realizar una diferenciación simple
-diff_AirPassengers <- diff(AirPassengers)
-adf.test(diff_AirPassengers)
-
-# 5. Detección de valores atípicos
-# Visualizar posibles valores atípicos
-boxplot(AirPassengers, main="Boxplot de AirPassengers")
-
-# 6. Interpretación de resultados
-# Resumen de tendencias, estacionalidades y ciclos observados
-summary(decomposed)
-
-# Guardar el script en un archivo .R o .Rmd y subirlo a GitHub
+Identifica posibles valores atípicos en la serie temporal usando gráficos de caja y visualizaciones.
